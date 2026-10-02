@@ -8,12 +8,16 @@ export default function BlogCard({ post, variant = 'dark' }) {
           card: 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900/40 hover:border-indigo-300 dark:hover:border-slate-500',
           title: 'text-slate-900 dark:text-slate-100',
           date: 'text-slate-500 dark:text-slate-400',
+          chip: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-500/15 dark:text-indigo-300',
         }
       : {
           card: 'border-slate-700 bg-slate-900/40 hover:border-slate-500',
           title: 'text-white',
           date: 'text-slate-400',
+          chip: 'bg-indigo-500/15 text-indigo-300',
         }
+
+  const categories = (post.categories || []).filter(Boolean).slice(0, 2)
 
   return (
     <Link
@@ -30,6 +34,18 @@ export default function BlogCard({ post, variant = 'dark' }) {
         </div>
       )}
       <div className="p-5">
+        {categories.length > 0 && (
+          <div className="flex flex-wrap gap-2 mb-3">
+            {categories.map((c) => (
+              <span
+                key={c}
+                className={`rounded-full px-3 py-1 text-xs font-semibold ${styles.chip}`}
+              >
+                {c}
+              </span>
+            ))}
+          </div>
+        )}
         <h3 className={`text-lg font-bold leading-snug line-clamp-2 ${styles.title}`}>
           {post.title}
         </h3>
