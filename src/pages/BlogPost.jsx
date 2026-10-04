@@ -45,6 +45,37 @@ const components = {
           {value.label || 'Download file'}
         </a>
       ) : null,
+    table: ({ value }) => {
+      const rows = value?.rows || []
+      if (rows.length === 0) return null
+      const [head, ...bodyRows] = rows
+      return (
+        <div className="not-prose my-6 overflow-x-auto rounded-lg border border-slate-700">
+          <table className="w-full text-left text-sm">
+            <thead className="bg-slate-800 text-white">
+              <tr>
+                {(head.cells || []).map((c, i) => (
+                  <th key={i} className="px-4 py-3 font-semibold">
+                    {c}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {bodyRows.map((r, ri) => (
+                <tr key={r._key || ri} className="border-t border-slate-700">
+                  {(r.cells || []).map((c, ci) => (
+                    <td key={ci} className="px-4 py-3 text-slate-200">
+                      {c}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )
+    },
   },
   block: {
     small: ({ children }) => <p className="text-sm">{children}</p>,
@@ -126,7 +157,7 @@ export default function BlogPost() {
     client
       .fetch(
         `*[_type=="post" && slug.current==$slug][0]{
-          title, publishedAt, mainImage,
+          title, publishedAt, mainImage, tags,
           "author": author->{name, image},
           "categories": categories[]->title,
           "plain": pt::text(body),
@@ -183,13 +214,26 @@ export default function BlogPost() {
       </div>
 
       {post.categories?.length > 0 && (
-        <div className="flex flex-wrap gap-2 mb-6">
-          {post.categories.map((c) => (
+        <div className="flex flex-wrap gap-2 mb-3">
+          {post.categories.filter(Boolean).map((c) => (
             <span
               key={c}
               className="rounded-full bg-indigo-500/15 text-indigo-300 px-3 py-1 text-xs font-semibold"
             >
               {c}
+            </span>
+          ))}
+        </div>
+      )}
+
+      {post.tags?.length > 0 && (
+        <div className="flex flex-wrap gap-2 mb-6">
+          {post.tags.map((t) => (
+            <span
+              key={t}
+              className="rounded-full border border-slate-600 text-slate-300 px-3 py-1 text-xs"
+            >
+              #{t}
             </span>
           ))}
         </div>
