@@ -242,7 +242,7 @@ export default function BlogPost() {
       {post.mainImage && (
         <img
           src={urlFor(post.mainImage).width(1000).url()}
-          alt={post.title}
+          alt={post.mainImage?.alt || post.title}
           className="rounded-lg mb-8 w-full"
         />
       )}

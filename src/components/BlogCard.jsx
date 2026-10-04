@@ -28,7 +28,7 @@ export default function BlogCard({ post, variant = 'dark' }) {
         <div className="overflow-hidden">
           <img
             src={urlFor(post.mainImage).width(600).height(340).url()}
-            alt={post.title}
+            alt={post.mainImage?.alt || post.title}
             className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-500"
           />
         </div>
