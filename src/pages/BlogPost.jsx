@@ -9,6 +9,20 @@ function getYouTubeId(url = '') {
   return m ? m[1] : null
 }
 
+// Table cell ma **text** lekhe bold dekhaune
+function renderCell(text) {
+  const parts = String(text ?? '').split(/(\*\*[^*]+\*\*)/g)
+  return parts.map((part, i) =>
+    part.startsWith('**') && part.endsWith('**') && part.length > 4 ? (
+      <strong key={i} className="font-bold text-white">
+        {part.slice(2, -2)}
+      </strong>
+    ) : (
+      <span key={i}>{part}</span>
+    )
+  )
+}
+
 const components = {
   types: {
     image: ({ value }) => (
@@ -56,7 +70,7 @@ const components = {
               <tr>
                 {(head.cells || []).map((c, i) => (
                   <th key={i} className="px-4 py-3 font-semibold">
-                    {c}
+                    {renderCell(c)}
                   </th>
                 ))}
               </tr>
@@ -66,7 +80,7 @@ const components = {
                 <tr key={r._key || ri} className="border-t border-slate-700">
                   {(r.cells || []).map((c, ci) => (
                     <td key={ci} className="px-4 py-3 text-slate-200">
-                      {c}
+                      {renderCell(c)}
                     </td>
                   ))}
                 </tr>
