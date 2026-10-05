@@ -9,7 +9,7 @@ const staticPages = ['/', '/about', '/projects', '/services', '/contact', '/gall
 const query = encodeURIComponent(
   '*[_type=="post" && defined(slug.current)]{"slug": slug.current, "updated": _updatedAt}'
 )
-const url = `https://${PROJECT_ID}.apicdn.sanity.io/v2024-01-01/data/query/${DATASET}?query=${query}`
+   const url = `https://${PROJECT_ID}.api.sanity.io/v2024-01-01/data/query/${DATASET}?query=${query}`
 
 let posts = []
 try {
