@@ -181,6 +181,16 @@ export default function BlogPost() {
   const imageUrl = post.mainImage ? urlFor(post.mainImage).width(1200).height(630).url() : ''
   const pageTitle = `${post.title} | Shishir Shahi`
 
+  // Comma sahit lekheko tag lai pani alag alag chip ma todne
+  const tagList = [
+    ...new Set(
+      (post.tags || [])
+        .flatMap((t) => String(t).split(','))
+        .map((t) => t.trim())
+        .filter(Boolean)
+    ),
+  ]
+
   return (
     <article className="max-w-3xl mx-auto px-4 pt-10 pb-12">
       {/* SEO tags */}
@@ -226,9 +236,9 @@ export default function BlogPost() {
         </div>
       )}
 
-      {post.tags?.length > 0 && (
+      {tagList.length > 0 && (
         <div className="flex flex-wrap gap-2 mb-6">
-          {post.tags.map((t) => (
+          {tagList.map((t) => (
             <span
               key={t}
               className="rounded-full border border-slate-600 text-slate-300 px-3 py-1 text-xs"
