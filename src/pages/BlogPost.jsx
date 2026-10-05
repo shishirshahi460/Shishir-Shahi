@@ -157,7 +157,7 @@ export default function BlogPost() {
     client
       .fetch(
         `*[_type=="post" && slug.current==$slug][0]{
-          title, publishedAt, mainImage, tags,
+          title, publishedAt, mainImage,
           "author": author->{name, image},
           "categories": categories[]->title,
           "plain": pt::text(body),
@@ -180,16 +180,6 @@ export default function BlogPost() {
   const description = (post.plain || '').replace(/\s+/g, ' ').trim().slice(0, 160)
   const imageUrl = post.mainImage ? urlFor(post.mainImage).width(1200).height(630).url() : ''
   const pageTitle = `${post.title} | Shishir Shahi`
-
-  // Comma sahit lekheko tag lai pani alag alag chip ma todne
-  const tagList = [
-    ...new Set(
-      (post.tags || [])
-        .flatMap((t) => String(t).split(','))
-        .map((t) => t.trim())
-        .filter(Boolean)
-    ),
-  ]
 
   return (
     <article className="max-w-3xl mx-auto px-4 pt-10 pb-12">
@@ -224,26 +214,13 @@ export default function BlogPost() {
       </div>
 
       {post.categories?.length > 0 && (
-        <div className="flex flex-wrap gap-2 mb-3">
+        <div className="flex flex-wrap gap-2 mb-6">
           {post.categories.filter(Boolean).map((c) => (
             <span
               key={c}
               className="rounded-full bg-indigo-500/15 text-indigo-300 px-3 py-1 text-xs font-semibold"
             >
               {c}
-            </span>
-          ))}
-        </div>
-      )}
-
-      {tagList.length > 0 && (
-        <div className="flex flex-wrap gap-2 mb-6">
-          {tagList.map((t) => (
-            <span
-              key={t}
-              className="rounded-full border border-slate-600 text-slate-300 px-3 py-1 text-xs"
-            >
-              #{t}
             </span>
           ))}
         </div>
