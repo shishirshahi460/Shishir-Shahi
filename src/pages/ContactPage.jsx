@@ -118,8 +118,8 @@ const contactInfo = [
   {
     icon: <Globe size={22} />,
     label: 'Portfolio',
-    value: 'shishirshahi05.dev',
-    href: 'https://shishirshahi05.dev',
+    value: 'shishirshahi.com.np',
+    href: 'https://www.shishirshahi.com.np',
     gradient: 'from-emerald-500 to-teal-600',
     bg: 'bg-emerald-50 dark:bg-emerald-950/30 border-emerald-100 dark:border-emerald-900/40',
     desc: 'View my full portfolio',
@@ -423,15 +423,6 @@ export default function ContactPage() {
                     </div>
                   ) : (
                     <form ref={formRef} onSubmit={handleSubmit} className="space-y-5">
-
-                      {/* Setup hint banner — remove after you add your EmailJS keys */}
-                      {EMAILJS_SERVICE_ID === 'YOUR_SERVICE_ID' && (
-                        <div className="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-2xl p-4 text-xs text-amber-700 dark:text-amber-400 leading-relaxed">
-                          <strong>⚙️ Setup required:</strong> Replace <code>EMAILJS_SERVICE_ID</code>, <code>EMAILJS_TEMPLATE_ID</code>,
-                          and <code>EMAILJS_PUBLIC_KEY</code> at the top of this file with your EmailJS credentials.
-                          See the step-by-step guide in the comments. Takes ~5 minutes!
-                        </div>
-                      )}
 
                       <div className="grid sm:grid-cols-2 gap-5">
                         <FormInput label="Full Name" icon={<User size={16} />} name="name" value={form.name}
