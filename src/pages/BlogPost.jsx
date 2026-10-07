@@ -14,7 +14,7 @@ function renderCell(text) {
   const parts = String(text ?? '').split(/(\*\*[^*]+\*\*)/g)
   return parts.map((part, i) =>
     part.startsWith('**') && part.endsWith('**') && part.length > 4 ? (
-      <strong key={i} className="font-bold text-white">
+      <strong key={i} className="font-bold text-slate-900 dark:text-white">
         {part.slice(2, -2)}
       </strong>
     ) : (
@@ -64,9 +64,9 @@ const components = {
       if (rows.length === 0) return null
       const [head, ...bodyRows] = rows
       return (
-        <div className="not-prose my-6 overflow-x-auto rounded-lg border border-slate-700">
+        <div className="not-prose my-6 overflow-x-auto rounded-lg border border-slate-200 dark:border-slate-700">
           <table className="w-full text-left text-sm">
-            <thead className="bg-slate-800 text-white">
+            <thead className="bg-slate-100 text-slate-900 dark:bg-slate-800 dark:text-white">
               <tr>
                 {(head.cells || []).map((c, i) => (
                   <th key={i} className="px-4 py-3 font-semibold">
@@ -77,9 +77,15 @@ const components = {
             </thead>
             <tbody>
               {bodyRows.map((r, ri) => (
-                <tr key={r._key || ri} className="border-t border-slate-700">
+                <tr
+                  key={r._key || ri}
+                  className="border-t border-slate-200 dark:border-slate-700"
+                >
                   {(r.cells || []).map((c, ci) => (
-                    <td key={ci} className="px-4 py-3 text-slate-200">
+                    <td
+                      key={ci}
+                      className="px-4 py-3 text-slate-700 dark:text-slate-200"
+                    >
                       {renderCell(c)}
                     </td>
                   ))}
@@ -134,11 +140,11 @@ function ShareButtons({ title }) {
   }
 
   const btn =
-    'inline-flex items-center gap-2 rounded-full border border-slate-600 px-4 py-2 text-sm font-semibold hover:border-indigo-400 hover:text-indigo-400 transition'
+    'inline-flex items-center gap-2 rounded-full border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:border-indigo-400 hover:text-indigo-600 transition dark:border-slate-600 dark:bg-transparent dark:text-slate-200 dark:hover:text-indigo-400'
 
   return (
-    <div className="mt-12 border-t border-slate-700 pt-6">
-      <p className="text-sm font-bold uppercase tracking-wide text-slate-400 mb-3">
+    <div className="mt-12 border-t border-slate-200 dark:border-slate-700 pt-6">
+      <p className="text-sm font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400 mb-3">
         Share this post
       </p>
       <div className="flex flex-wrap gap-3">
@@ -157,6 +163,15 @@ function ShareButtons({ title }) {
           {copied ? 'Copied!' : 'Copy link'}
         </button>
       </div>
+    </div>
+  )
+}
+
+// Home page ko jasto background ra text rang
+function Shell({ children }) {
+  return (
+    <div className="min-h-screen bg-[#f8f9ff] dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors">
+      {children}
     </div>
   )
 }
@@ -188,71 +203,93 @@ export default function BlogPost() {
       .finally(() => setLoading(false))
   }, [slug])
 
-  if (loading) return <p className="pt-10 text-center">Loading...</p>
-  if (!post) return <p className="pt-10 text-center">Post not found.</p>
+  if (loading)
+    return (
+      <Shell>
+        <p className="pt-10 text-center text-slate-500 dark:text-slate-400">Loading...</p>
+      </Shell>
+    )
+
+  if (!post)
+    return (
+      <Shell>
+        <p className="pt-10 text-center text-slate-500 dark:text-slate-400">
+          Post not found.
+        </p>
+      </Shell>
+    )
 
   const description = (post.plain || '').replace(/\s+/g, ' ').trim().slice(0, 160)
   const imageUrl = post.mainImage ? urlFor(post.mainImage).width(1200).height(630).url() : ''
   const pageTitle = `${post.title} | Shishir Shahi`
 
   return (
-    <article className="max-w-3xl mx-auto px-4 pt-10 pb-12">
-      {/* SEO tags */}
-      <title>{pageTitle}</title>
-      <meta name="description" content={description} />
-      <meta property="og:type" content="article" />
-      <meta property="og:title" content={post.title} />
-      <meta property="og:description" content={description} />
-      {imageUrl && <meta property="og:image" content={imageUrl} />}
+    <Shell>
+      <article className="max-w-3xl mx-auto px-4 pt-10 pb-16">
+        {/* SEO tags */}
+        <title>{pageTitle}</title>
+        <meta name="description" content={description} />
+        <meta property="og:type" content="article" />
+        <meta property="og:title" content={post.title} />
+        <meta property="og:description" content={description} />
+        {imageUrl && <meta property="og:image" content={imageUrl} />}
 
-      <Link to="/blogs" className="text-blue-400 text-sm">← Back to Blogs</Link>
-      <h1 className="text-4xl font-bold mt-4 mb-4">{post.title}</h1>
+        <Link
+          to="/blogs"
+          className="text-sm font-semibold text-indigo-600 hover:text-indigo-500 dark:text-blue-400"
+        >
+          ← Back to Blogs
+        </Link>
+        <h1 className="text-3xl md:text-4xl font-black tracking-tight mt-4 mb-4">
+          {post.title}
+        </h1>
 
-      {/* Author + date */}
-      <div className="flex items-center gap-3 mb-6">
-        {post.author?.image && (
+        {/* Author + date */}
+        <div className="flex items-center gap-3 mb-6">
+          {post.author?.image && (
+            <img
+              src={urlFor(post.author.image).width(80).height(80).url()}
+              alt={post.author.name}
+              className="w-10 h-10 rounded-full object-cover"
+            />
+          )}
+          <div className="text-sm">
+            {post.author?.name && <p className="font-semibold">By {post.author.name}</p>}
+            {post.publishedAt && (
+              <p className="text-slate-500 dark:text-slate-400">
+                {new Date(post.publishedAt).toLocaleDateString()}
+              </p>
+            )}
+          </div>
+        </div>
+
+        {post.categories?.length > 0 && (
+          <div className="flex flex-wrap gap-2 mb-6">
+            {post.categories.filter(Boolean).map((c) => (
+              <span
+                key={c}
+                className="rounded-full bg-indigo-100 text-indigo-700 dark:bg-indigo-500/15 dark:text-indigo-300 px-3 py-1 text-xs font-semibold"
+              >
+                {c}
+              </span>
+            ))}
+          </div>
+        )}
+
+        {post.mainImage && (
           <img
-            src={urlFor(post.author.image).width(80).height(80).url()}
-            alt={post.author.name}
-            className="w-10 h-10 rounded-full object-cover"
+            src={urlFor(post.mainImage).width(1000).url()}
+            alt={post.mainImage?.alt || post.title}
+            className="rounded-lg mb-8 w-full"
           />
         )}
-        <div className="text-sm">
-          {post.author?.name && <p className="font-semibold">By {post.author.name}</p>}
-          {post.publishedAt && (
-            <p className="text-slate-400">
-              {new Date(post.publishedAt).toLocaleDateString()}
-            </p>
-          )}
+
+        <div className="prose prose-lg dark:prose-invert max-w-none">
+          <PortableText value={post.body} components={components} />
         </div>
-      </div>
 
-      {post.categories?.length > 0 && (
-        <div className="flex flex-wrap gap-2 mb-6">
-          {post.categories.filter(Boolean).map((c) => (
-            <span
-              key={c}
-              className="rounded-full bg-indigo-500/15 text-indigo-300 px-3 py-1 text-xs font-semibold"
-            >
-              {c}
-            </span>
-          ))}
-        </div>
-      )}
-
-      {post.mainImage && (
-        <img
-          src={urlFor(post.mainImage).width(1000).url()}
-          alt={post.mainImage?.alt || post.title}
-          className="rounded-lg mb-8 w-full"
-        />
-      )}
-
-      <div className="prose prose-lg prose-invert max-w-none">
-        <PortableText value={post.body} components={components} />
-      </div>
-
-      <ShareButtons title={post.title} />
-    </article>
+        <ShareButtons title={post.title} />
+      </article>
+    </Shell>
   )
 }
