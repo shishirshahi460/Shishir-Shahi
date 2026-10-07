@@ -13,8 +13,11 @@ export default function LatestBlogs() {
   useEffect(() => {
     client
       .fetch(
-        `*[_type=="post" && defined(slug.current)] | order(publishedAt desc)[0...${LIMIT}]{
-          title, publishedAt, mainImage, "slug": slug.current
+        `*[_type=="post" && defined(slug.current)] | order(coalesce(publishedAt, _createdAt) desc)[0...${LIMIT}]{
+          title, mainImage,
+          "publishedAt": coalesce(publishedAt, _createdAt),
+          "slug": slug.current,
+          "categories": categories[]->title
         }`
       )
       .then(setPosts)

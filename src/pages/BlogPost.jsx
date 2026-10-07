@@ -105,11 +105,17 @@ const components = {
     highlight: ({ children }) => (
       <mark className="bg-yellow-300 text-slate-900 px-1 rounded">{children}</mark>
     ),
-    link: ({ value, children }) => (
-      <a href={value.href} target="_blank" rel="noreferrer">
-        {children}
-      </a>
-    ),
+    link: ({ value, children }) => {
+      const href = value?.href || ''
+      const isInternal = href.startsWith('/')
+      return isInternal ? (
+        <Link to={href}>{children}</Link>
+      ) : (
+        <a href={href} target="_blank" rel="noreferrer">
+          {children}
+        </a>
+      )
+    },
   },
 }
 
@@ -186,7 +192,9 @@ export default function BlogPost() {
     client
       .fetch(
         `*[_type=="post" && slug.current==$slug][0]{
-          title, publishedAt, mainImage,
+          title,
+          "publishedAt": coalesce(publishedAt, _createdAt),
+          mainImage,
           "author": author->{name, image},
           "categories": categories[]->title,
           "plain": pt::text(body),

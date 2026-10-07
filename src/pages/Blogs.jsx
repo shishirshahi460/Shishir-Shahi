@@ -12,8 +12,9 @@ export default function Blogs() {
   useEffect(() => {
     client
       .fetch(
-        `*[_type=="post" && defined(slug.current)] | order(publishedAt desc){
-          title, publishedAt, mainImage,
+        `*[_type=="post" && defined(slug.current)] | order(coalesce(publishedAt, _createdAt) desc){
+          title, mainImage,
+          "publishedAt": coalesce(publishedAt, _createdAt),
           "slug": slug.current,
           "categories": categories[]->title
         }`
