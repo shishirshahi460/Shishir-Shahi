@@ -10,18 +10,24 @@ const esc = (s = '') =>
     .replace(/>/g, '&gt;')
 
 async function getPost(slug) {
-  const query = `*[_type=="post" && slug.current==$slug][0]{
-    title,
-    "plain": pt::text(body),
-    "image": mainImage.asset->url
-  }`
-  const url =
-    `https://${PROJECT_ID}.api.sanity.io/v2024-01-01/data/query/${DATASET}` +
-    `?query=${encodeURIComponent(query)}&$slug=${encodeURIComponent(JSON.stringify(slug))}`
+  const params = new URLSearchParams()
+  params.set(
+    'query',
+    '*[_type=="post" && slug.current==$slug][0]{ title, "plain": pt::text(body), "image": mainImage.asset->url }'
+  )
+  params.set('$slug', JSON.stringify(slug))
+  const url = `https://${PROJECT_ID}.api.sanity.io/v2024-01-01/data/query/${DATASET}?${params.toString()}`
   const res = await fetch(url)
-  if (!res.ok) return null
+  if (!res.ok) throw new Error(`Sanity ${res.status}`)
   const json = await res.json()
   return json.result || null
+}
+
+// Tag cha vane badalne, chhaina vane </head> aghi thapne
+function setMeta(html, key, value, content) {
+  const tag = `<meta ${key}="${value}" content="${esc(content)}" />`
+  const re = new RegExp(`<meta[^>]*${key}="${value}"[^>]*>`, 'i')
+  return re.test(html) ? html.replace(re, tag) : html.replace('</head>', `    ${tag}\n  </head>`)
 }
 
 export default async function handler(req, res) {
@@ -36,6 +42,7 @@ export default async function handler(req, res) {
     return
   }
 
+  let status = 'no-slug'
   try {
     const post = slug ? await getPost(slug) : null
     if (post && post.title) {
@@ -46,32 +53,36 @@ export default async function handler(req, res) {
         : `${SITE}/og-image.jpg`
       const pageUrl = `${SITE}/blogs/${encodeURIComponent(slug)}`
 
-      html = html
-        .replace(/<title>[\s\S]*?<\/title>/, '')
-        .replace(/<link\s+rel="canonical"[^>]*>/, '')
-        .replace(/<meta\s+(?:name|property)="(?:description|og:[a-z:]+|twitter:[a-z:]+)"[\s\S]*?\/>/g, '')
-
-      const tags = `
-    <title>${esc(title)}</title>
-    <meta name="description" content="${esc(description)}" />
-    <link rel="canonical" href="${esc(pageUrl)}" />
-    <meta property="og:type" content="article" />
-    <meta property="og:url" content="${esc(pageUrl)}" />
-    <meta property="og:title" content="${esc(post.title)}" />
-    <meta property="og:description" content="${esc(description)}" />
-    <meta property="og:image" content="${esc(image)}" />
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="${esc(post.title)}" />
-    <meta name="twitter:description" content="${esc(description)}" />
-    <meta name="twitter:image" content="${esc(image)}" />
-  `
-      html = html.replace('</head>', `${tags}</head>`)
+      html = html.replace(/<title>[\s\S]*?<\/title>/i, `<title>${esc(title)}</title>`)
+      html = html.replace(
+        /<link[^>]*rel="canonical"[^>]*>/i,
+        `<link rel="canonical" href="${esc(pageUrl)}" />`
+      )
+      html = setMeta(html, 'name', 'description', description)
+      html = setMeta(html, 'property', 'og:type', 'article')
+      html = setMeta(html, 'property', 'og:url', pageUrl)
+      html = setMeta(html, 'property', 'og:title', post.title)
+      html = setMeta(html, 'property', 'og:description', description)
+      html = setMeta(html, 'property', 'og:image', image)
+      html = setMeta(html, 'name', 'twitter:card', 'summary_large_image')
+      html = setMeta(html, 'name', 'twitter:title', post.title)
+      html = setMeta(html, 'name', 'twitter:description', description)
+      html = setMeta(html, 'name', 'twitter:image', image)
+      status = 'post-found'
+    } else {
+      status = 'post-not-found'
     }
   } catch (err) {
-    console.error(err)
+    status = `error: ${err.message}`
+  }
+
+  if (req.query.debug) {
+    res.status(200).json({ slug, status })
+    return
   }
 
   res.setHeader('Content-Type', 'text/html; charset=utf-8')
   res.setHeader('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=600')
+  res.setHeader('X-Meta-Status', status)
   res.status(200).send(html)
 }
